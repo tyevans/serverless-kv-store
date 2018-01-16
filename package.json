@@ -1,0 +1,10 @@
+{
+  "name": "simple-key-value-store",
+  "version": "1.0.0",
+  "description": "Serverless key-value store offering basic CRUD functionality",
+  "author": "Tyler Evans",
+  "license": "MIT",
+  "dependencies": {
+    "serverless-python-requirements": "https://github.com/UnitedIncome/serverless-python-requirements/tarball/v3.0.0-beta.3"
+  }
+}

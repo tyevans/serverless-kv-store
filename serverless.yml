@@ -1,0 +1,110 @@
+service: simple-key-value-store
+
+frameworkVersion: ">=1.1.0 <2.0.0"
+
+plugins:
+  - serverless-python-requirements
+
+package:
+  exclude:
+    - node_modules/**
+    - .idea/**
+    - .requirements/**
+    - env/**
+    - venv/**
+    - README.md
+    - package.json
+    - package-lock.json
+    - requirements.txt
+
+provider:
+  name: aws
+  runtime: python3.6
+  region: us-west-1
+  environment:
+    DYNAMODB_TABLE: ${self:service}-${opt:stage, self:provider.stage}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+        - dynamodb:DescribeTable
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
+
+functions:
+  create:
+    handler: keyvaluestore/api.create
+    events:
+      - http:
+          path: kvstore/v1/
+          method: post
+          cors: true
+
+  list:
+    handler: keyvaluestore/api.list_entries
+    events:
+      - http:
+          path: kvstore/v1/
+          method: get
+          cors: true
+
+  get:
+    handler: keyvaluestore/api.get
+    events:
+      - http:
+          path: kvstore/v1/{key}
+          method: get
+          cors: true
+          request:
+            parameters:
+              paths:
+                key: true
+
+  update:
+    handler: keyvaluestore/api.update
+    events:
+      - http:
+          path: kvstore/v1/{key}
+          method: put
+          cors: true
+          request:
+            parameters:
+              paths:
+                key: true
+  delete:
+    handler: keyvaluestore/api.delete
+    events:
+      - http:
+          path: kvstore/v1/{key}
+          method: delete
+          cors: true
+          request:
+            parameters:
+              paths:
+                key: true
+
+resources:
+  Resources:
+    KVStoreDynamoDbTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Retain
+      Properties:
+        AttributeDefinitions:
+          -
+            AttributeName: key
+            AttributeType: S
+        KeySchema:
+          -
+            AttributeName: key
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}
+custom:
+  pythonRequirements:
+    pythonBin: "c:/Program Files/Python36/python.exe"
