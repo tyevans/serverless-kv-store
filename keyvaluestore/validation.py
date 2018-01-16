@@ -19,8 +19,8 @@ def validate_fields_present(data, require_key=False, require_value=False):
             raise ValidationError("key", "Key must be a string")
 
     if require_value:
-        if "key" not in data:
-            raise ValidationError("value", "Invalid Request.  Missing 'key' field in json request.")
+        if "value" not in data:
+            raise ValidationError("value", "Invalid Request.  Missing 'value' field in json request.")
         if not isinstance(data["value"], list):
             raise ValidationError("value", "'value' must be a list of strings")
         if not all(isinstance(v, str) for v in data["value"]):
